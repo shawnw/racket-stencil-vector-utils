@@ -22,6 +22,7 @@
           [stencil-vector-empty? (-> stencil-vector? boolean?)]
           [make-stencil-vector (-> stencil-vector-bitmask? any/c stencil-vector?)]
           [build-stencil-vector (-> stencil-vector-bitmask? (-> exact-nonnegative-integer? any/c) stencil-vector?)]
+          [stencil-vector-copy (->* (stencil-vector?) (#:bitmask stencil-vector-bitmask?) stencil-vector?)]
           [in-stencil-vector (-> stencil-vector? sequence?)]
           [stencil-vector->list (-> stencil-vector? list?)]
           [stencil-vector->vector (-> stencil-vector? vector?)]
@@ -75,6 +76,13 @@
 
 (define (build-stencil-vector bitmask proc)
   (apply stencil-vector bitmask (for/list ([i (in-range (fxpopcount bitmask))]) (proc i))))
+
+(define (stencil-vector-copy sv #:bitmask [bitmask (stencil-vector-mask sv)])
+  (unless (fx= (fxpopcount bitmask) (stencil-vector-length sv))
+    (raise-argument-error 'stencil-vector-copy "bitmask has different arity than stencil vector argument" bitmask))
+  (if (fx= bitmask (stencil-vector-mask sv))
+      (stencil-vector-update sv 0 0)
+      (build-stencil-vector bitmask (lambda (n) (stencil-vector-ref sv n)))))
 
 (define (in-stencil-vector sv)
   (make-do-sequence
@@ -175,5 +183,16 @@
   (check-true (stencil-vector-has-slot? sv4 2))
   (check-true (stencil-vector-has-slot? sv4 3))
 
+  (define sv5 (stencil-vector-copy sv4))
+  (check-false (eq? sv4 sv5))
+  (check-equal? sv4 sv5)
+  (define sv6 (stencil-vector-copy #:bitmask #b101010 sv4))
+  (check-equal? (stencil-vector->list sv4) (stencil-vector->list sv6))
+  (check-false (stencil-vector-has-slot? sv6 0))
+  (check-true (stencil-vector-has-slot? sv6 1))
+  (check-false (stencil-vector-has-slot? sv6 2))
+  (check-true (stencil-vector-has-slot? sv6 3))
+  (check-false (stencil-vector-has-slot? sv6 4))
+  (check-true (stencil-vector-has-slot? sv6 5))
 
   )

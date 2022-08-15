@@ -48,7 +48,8 @@ Returns @code{#t} if the stencil vector has a length of 0.
 
 @section{Stencil Vector Operations}
 
-@defproc([make-stencil-vector [bitmask stencil-vector-bitmask?] [v any/c]) stencil-vector?]{
+@defproc[(make-stencil-vector [bitmask stencil-vector-bitmask?] [v any/c])
+         stencil-vector?]{
 
 Create a new stencil vector using the given bitmask, with every element populated with @code{v}.
 
@@ -59,6 +60,16 @@ Create a new stencil vector using the given bitmask, with every element populate
 
 Create a new stencil vector using the given bitmask, populated by the
 results of calling @code{proc} on each index in turn.
+
+}
+
+@defproc[(stencil-vector-copy [sv stencil-vector?] [#:bitmask stencil-vector-bitmask? (stencil-vector-mask sv)])
+         stencil-vector?]{
+
+Returns a newly allocated copy of the stencil vector. Normally the new
+one has the same bitmask, but you can specify a new one with the
+@code{#:bitmask} keyword. It is an error if the new bitmask has a
+different arity than the original.
 
 }
 
