@@ -20,6 +20,8 @@
           [stencil-vector-slot-ref (->* (stencil-vector? stencil-vector-slot?) (any/c) any)]
           [stencil-vector-has-slot? (-> stencil-vector? stencil-vector-slot? boolean?)]
           [stencil-vector-empty? (-> stencil-vector? boolean?)]
+          [make-stencil-vector (-> stencil-vector-bitmask? any/c stencil-vector?)]
+          [build-stencil-vector (-> stencil-vector-bitmask? (-> exact-nonnegative-integer? any/c) stencil-vector?)]
           [in-stencil-vector (-> stencil-vector? sequence?)]
           [stencil-vector->list (-> stencil-vector? list?)]
           [stencil-vector->vector (-> stencil-vector? vector?)]
@@ -63,6 +65,16 @@
 
 (define (stencil-vector-empty? sv)
   (fx= (stencil-vector-mask sv) 0))
+
+(define/contract (repeat n v)
+  (-> exact-nonnegative-integer? any/c list?)
+  (for/list ([i (in-range n)]) v))
+
+(define (make-stencil-vector bitmask v)
+  (apply stencil-vector bitmask (repeat (fxpopcount bitmask) v)))
+
+(define (build-stencil-vector bitmask proc)
+  (apply stencil-vector bitmask (for/list ([i (in-range (fxpopcount bitmask))]) (proc i))))
 
 (define (in-stencil-vector sv)
   (make-do-sequence
@@ -145,5 +157,23 @@
   (check-true (stencil-vector-has-slot? sv2 4))
 
   (check-equal? (stencil-vector-fold (lambda (s total) (+ (string-length s) total)) 0 sv1) 3)
+
+
+  (define sv3 (make-stencil-vector #b111 1))
+  (check-equal? (stencil-vector-length sv3) 3)
+  (check-equal? (stencil-vector->list sv3) '(1 1 1))
+  (check-true (stencil-vector-has-slot? sv3 0))
+  (check-true (stencil-vector-has-slot? sv3 1))
+  (check-true (stencil-vector-has-slot? sv3 2))
+  (check-false (stencil-vector-has-slot? sv3 3))
+
+  (define sv4 (build-stencil-vector #b1110 add1))
+  (check-equal? (stencil-vector-length sv4) 3)
+  (check-equal? (stencil-vector->list sv4) '(1 2 3))
+  (check-false (stencil-vector-has-slot? sv4 0))
+  (check-true (stencil-vector-has-slot? sv4 1))
+  (check-true (stencil-vector-has-slot? sv4 2))
+  (check-true (stencil-vector-has-slot? sv4 3))
+
 
   )

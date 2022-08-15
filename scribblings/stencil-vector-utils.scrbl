@@ -48,6 +48,20 @@ Returns @code{#t} if the stencil vector has a length of 0.
 
 @section{Stencil Vector Operations}
 
+@defproc([make-stencil-vector [bitmask stencil-vector-bitmask?] [v any/c]) stencil-vector?]{
+
+Create a new stencil vector using the given bitmask, with every element populated with @code{v}.
+
+}
+
+@defproc[(build-stencil-vector [bitmask stencil-vector-bitmask?] [proc (-> exact-nonnegative-integer? any/c)])
+         stencil-vector?]{
+
+Create a new stencil vector using the given bitmask, populated by the
+results of calling @code{proc} on each index in turn.
+
+}
+
 @defproc[(stencil-vector-slot->index [sv stencil-vector?] [slot stencil-vector-slot?])
          (or/c exact-nonnegative-integer? #f)]{
 
