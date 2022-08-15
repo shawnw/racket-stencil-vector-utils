@@ -40,6 +40,12 @@ Returns @code{#t} if a value is associated with the given slot, @code{#f} if not
 
 }
 
+@defproc[(stencil-vector-empty? [sv stencil-vector?]) boolean?]{
+
+Returns @code{#t} if the stencil vector has a length of 0.
+
+}
+
 @section{Stencil Vector Operations}
 
 @defproc[(stencil-vector-slot->index [sv stencil-vector?] [slot stencil-vector-slot?])

@@ -19,6 +19,7 @@
           [stencil-vector-index->slot (-> stencil-vector? exact-nonnegative-integer? stencil-vector-slot?)]
           [stencil-vector-slot-ref (->* (stencil-vector? stencil-vector-slot?) (any/c) any)]
           [stencil-vector-has-slot? (-> stencil-vector? stencil-vector-slot? boolean?)]
+          [stencil-vector-empty? (-> stencil-vector? boolean?)]
           [in-stencil-vector (-> stencil-vector? sequence?)]
           [stencil-vector->list (-> stencil-vector? list?)]
           [stencil-vector->vector (-> stencil-vector? vector?)]
@@ -58,7 +59,10 @@
             default))))
 
 (define (stencil-vector-has-slot? sv i)
-  (> (fxand (stencil-vector-mask sv) (fxlshift 1 i)) 0))
+  (fx> (fxand (stencil-vector-mask sv) (fxlshift 1 i)) 0))
+
+(define (stencil-vector-empty? sv)
+  (fx= (stencil-vector-mask sv) 0))
 
 (define (in-stencil-vector sv)
   (make-do-sequence
@@ -103,6 +107,9 @@
   ;; required by another module.
 
   (define sv1 (stencil-vector #b10101 'a 'b 'c))
+
+  (check-false (stencil-vector-empty? sv1))
+  (check-true (stencil-vector-empty? (stencil-vector 0)))
 
   (check-true (stencil-vector-has-slot? sv1 0))
   (check-false (stencil-vector-has-slot? sv1 1))
