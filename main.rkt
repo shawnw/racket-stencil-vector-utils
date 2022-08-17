@@ -6,7 +6,8 @@
 (require (for-syntax racket/base (only-in racket/string string-prefix?)))
 (require (filtered-in
           (lambda (name)
-            (and (string-prefix? name "unsafe-fx")
+            (and (or (string-prefix? name "unsafe-fx")
+                     (string-prefix? name "unsafe-stencil-vector"))
                  (substring name 7)))
           racket/unsafe/ops))
 (module+ test
