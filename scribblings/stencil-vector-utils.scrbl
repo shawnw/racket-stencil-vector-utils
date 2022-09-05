@@ -73,6 +73,21 @@ different arity than the original.
 
 }
 
+@defproc[(stencil-vector-insert [sv stencil-vector?] [slot stencil-vector-slot?] [val any/c])
+         stencil-vector?]{
+
+Returns a new stencil vector with @code{val} added at the given
+slot. If there's already a value associated with that slot, it's
+replaced.
+
+}
+
+@defproc[(stencil-vector-remove [sv stencil-vector?] [slot stencil-vector-slot?]) stencil-vector?]{
+
+Returns a new stencil vector with the element at the given slot, if any, removed.
+
+}
+
 @defproc[(stencil-vector-slot->index [sv stencil-vector?] [slot stencil-vector-slot?])
          (or/c exact-nonnegative-integer? #f)]{
 
@@ -122,7 +137,7 @@ Calls @code{proc} for each element of the stencil vector in turn.
 
 }
 
-@defproc[(stencil-vector-map! [proc (-> any/c any/c)] [sv stencil-vector?]) veoid?]{
+@defproc[(stencil-vector-map! [proc (-> any/c any/c)] [sv stencil-vector?]) void?]{
 
 Replaces each element of the stencil vector with the result of calling
 @code{proc} on the old value.

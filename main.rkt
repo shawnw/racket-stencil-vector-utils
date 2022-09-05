@@ -31,6 +31,8 @@
           [stencil-vector-map! (-> (-> any/c any/c) stencil-vector? void?)]
           [stencil-vector-map (->* ((-> any/c any/c) stencil-vector?) (#:bitmask stencil-vector-bitmask?) stencil-vector?)]
           [stencil-vector-fold (-> (-> any/c any/c any/c) any/c stencil-vector? any/c)]
+          [stencil-vector-insert (-> stencil-vector? stencil-vector-slot? any/c stencil-vector?)]
+          [stencil-vector-remove (-> stencil-vector? stencil-vector-slot? stencil-vector?)]
           ))
 
 (define stencil-vector-slot? (integer-in 0 (sub1 (stencil-vector-mask-width))))
@@ -122,6 +124,17 @@
             ([n (in-range (stencil-vector-length sv))])
     (kons (stencil-vector-ref sv n) acc)))
 
+(define (stencil-vector-insert sv slot val)
+  (let ([mask (fxlshift 1 slot)])
+    (if (fx> (fxand (stencil-vector-mask sv) mask) 0)
+        (stencil-vector-update sv mask mask val)
+        (stencil-vector-update sv 0 mask val))))
+
+(define (stencil-vector-remove sv slot)
+  (if (stencil-vector-has-slot? sv slot)
+      (stencil-vector-update sv (fxlshift 1 slot) 0)
+      (stencil-vector-copy sv)))
+
 (module+ test
   ;; Any code in this `test` submodule runs when this file is run using DrRacket
   ;; or with `raco test`. The code here does not run when this file is
@@ -195,5 +208,17 @@
   (check-true (stencil-vector-has-slot? sv6 3))
   (check-false (stencil-vector-has-slot? sv6 4))
   (check-true (stencil-vector-has-slot? sv6 5))
+
+  (define sv7 (stencil-vector-insert sv6 0 "foo"))
+  (check-equal? (stencil-vector-length sv7) (+ (stencil-vector-length sv6) 1))
+  (check-equal? (stencil-vector-ref sv7 0) "foo")
+
+  (define sv8 (stencil-vector-insert sv6 1 "foo"))
+  (check-equal? (stencil-vector-length sv8) (stencil-vector-length sv6))
+  (check-equal? (stencil-vector-ref sv7 0) "foo")
+
+  (define sv9 (stencil-vector-remove sv7 0))
+  (check-equal? (stencil-vector-mask sv9) (stencil-vector-mask sv6))
+  (check-equal? (stencil-vector->list sv9) (stencil-vector->list sv6))
 
   )
